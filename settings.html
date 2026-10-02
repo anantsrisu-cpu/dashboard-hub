@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="th"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>ตั้งค่าแดชบอร์ด</title>
+<link rel="icon" href="data:image/svg+xml,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'&gt;&lt;text y='.9em' font-size='90'&gt;⚙️&lt;/text&gt;&lt;/svg&gt;">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #EEF1F4; --surface: #FFFFFF; --ink: #1C2430; --muted: #5B6675; --line: #D3D9E0;
+    --steel: #2F5D8A; --ok: #2E8A57; --bad: #B23B3B; color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #151A21; --surface: #1D242D; --ink: #E6EAEF; --muted: #9AA5B2; --line: #2E3742;
+      --steel: #6FA3D6; --ok: #5BC08A; --bad: #E07A7A; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #151A21; --surface: #1D242D; --ink: #E6EAEF; --muted: #9AA5B2; --line: #2E3742;
+    --steel: #6FA3D6; --ok: #5BC08A; --bad: #E07A7A; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink); font-size: 15px; line-height: 1.55;
+    font-family: "IBM Plex Sans Thai", "Noto Sans Thai", "Leelawadee UI", Tahoma, sans-serif;
+    padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 64px; }
+  .top { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+  .top h1 { font-size: 22px; font-weight: 600; margin: 0; flex: 1; }
+  a { color: var(--steel); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+  .card h2 { font-size: 17px; font-weight: 600; margin: 0 0 4px; display: flex; gap: 10px; align-items: center; }
+  .card h2 .n {
+    display: inline-grid; place-items: center; width: 24px; height: 24px; flex: 0 0 24px;
+    border-radius: 50%; background: var(--steel); color: var(--surface); font-size: 13px;
+  }
+  .sub { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+  label { display: block; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+  input[type=text], input[type=url], input[type=password] {
+    width: 100%; font: inherit; color: var(--ink); background: var(--paper);
+    border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; min-width: 0;
+  }
+  input:focus { outline: 2px solid var(--steel); outline-offset: 0; border-color: transparent; }
+  button { font: inherit; cursor: pointer; }
+  .btn { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 8px 14px; }
+  .btn:hover { border-color: var(--steel); }
+  .btn.primary { background: var(--steel); border-color: var(--steel); color: var(--surface); font-weight: 600; padding: 11px 20px; }
+  .btn.primary:disabled { opacity: .6; cursor: progress; }
+  .btn:focus-visible, .iconbtn:focus-visible, .sw:focus-visible, .copy:focus-visible, .linkbtn:focus-visible { outline: 2px solid var(--steel); outline-offset: 2px; }
+  .linkbtn { border: 0; background: none; color: var(--steel); padding: 0; text-decoration: underline; font-size: inherit; }
+  .add { display: flex; gap: 8px; }
+  .add input { flex: 1; }
+  .msg { font-size: 13px; min-height: 1.4em; margin: 6px 0 0; color: var(--muted); }
+  .msg.bad { color: var(--bad); }
+  #pubMsg:empty { min-height: 0; margin: 0; }
+  .item.empty { border-style: dashed; border-left: 6px solid var(--line); }
+  .slothead { display: flex; align-items: center; gap: 8px; }
+  .slotno { font-weight: 600; font-size: 14px; }
+  .state { font-size: 12px; padding: 0 8px; border-radius: 10px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  .state.on { border-color: var(--ok); color: var(--ok); }
+  .state.warn { border-color: var(--bad); color: var(--bad); }
+  .slothead .sp { flex: 1; }
+  .item .msg { margin: 0; }
+  .item .msg:empty, #topMsg:empty { display: none; }
+  #topMsg { margin: -6px 0 12px; }
+  .list { display: grid; gap: 12px; margin-top: 12px; }
+  .item { border: 1px solid var(--line); border-left: 6px solid var(--accent); border-radius: 4px 8px 8px 4px; padding: 12px; display: grid; gap: 8px; }
+  .row { display: flex; gap: 8px; align-items: center; }
+  .row .icon { width: 3.4em; flex: 0 0 auto; text-align: center; font-size: 18px; padding: 5px 4px; }
+  .row .grow { flex: 1; font-weight: 600; }
+  .iconbtn { border: 1px solid var(--line); background: transparent; color: var(--muted); border-radius: 6px; width: 34px; height: 34px; flex: 0 0 34px; }
+  .iconbtn:hover:not(:disabled) { color: var(--ink); border-color: var(--steel); }
+  .iconbtn.del:hover { color: var(--bad); border-color: var(--bad); }
+  .iconbtn:disabled { opacity: .35; cursor: default; }
+  .meta { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; font-size: 13px; color: var(--muted); }
+  .swatches { display: flex; gap: 6px; }
+  .sw { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; background: var(--c); padding: 0; }
+  .sw[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 2px var(--surface); }
+  .vid { display: flex; align-items: center; gap: 4px; }
+  .vid input[type=text] { width: 9em; padding: 4px 8px; }
+  .empty { color: var(--muted); text-align: center; padding: 20px; border: 1px dashed var(--line); border-radius: 8px; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .check { display: flex; gap: 8px; align-items: center; font-size: 14px; color: var(--ink); margin: 12px 0 0; }
+  .check input { width: 16px; height: 16px; margin: 0; }
+  details { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 12px; }
+  summary { cursor: pointer; color: var(--steel); font-size: 14px; }
+  ol.guide { padding-left: 1.3em; margin: 10px 0 0; font-size: 14px; }
+  ol.guide li { margin-bottom: 8px; }
+  .liveurl { font-size: 14px; margin: 12px 0 0; color: var(--muted); }
+  .liveurl b { color: var(--ink); font-weight: 600; word-break: break-all; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .steps { list-style: none; padding: 0; margin: 16px 0 0; display: grid; gap: 8px; }
+  .steps li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; font-size: 14px; }
+  .steps .dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); margin-top: 3px; }
+  .steps li.run .dot { border-color: var(--steel); border-top-color: transparent; animation: spin .8s linear infinite; }
+  .steps li.ok .dot { background: var(--ok); border-color: var(--ok); }
+  .steps li.fail .dot { background: var(--bad); border-color: var(--bad); }
+  .steps li.skip .dot { border-color: var(--ok); border-style: dashed; }
+  .steps li.wait { color: var(--muted); }
+  .steps .d { display: block; color: var(--muted); font-size: 13px; }
+  .steps li.fail .d { color: var(--bad); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .steps li.run .dot { animation: none; border-top-color: var(--steel); } }
+  .done { margin-top: 16px; padding: 16px; border-radius: 8px; background: var(--paper); border: 1px solid var(--ok); }
+  .done h3 { margin: 0 0 8px; font-size: 16px; color: var(--ok); }
+  .links { display: grid; gap: 6px; font-size: 14px; }
+  .link { display: flex; gap: 8px; align-items: center; }
+  .link a { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .link.big a { font-size: 16px; font-weight: 600; }
+  .copy { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 6px; padding: 3px 10px; font-size: 13px; flex: 0 0 auto; }
+  .note { font-size: 13px; color: var(--muted); margin: 10px 0 0; }
+  @media (max-width: 560px) {
+    .grid2 { grid-template-columns: 1fr; }
+    .card { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1>⚙️ ตั้งค่าแดชบอร์ด</h1>
+    <a href="./" id="backlink">ดูหน้ารวม</a>
+  </header>
+
+  <section class="card">
+    <h2><span class="n">1</span>แดชบอร์ดที่จะแสดง (4 ช่อง)</h2>
+    <p class="sub">ใส่ลิงก์เฉพาะช่องที่ต้องการใช้ ช่องที่ว่างจะไม่แสดงในหน้ารวม วางลิงก์แล้วระบบจะดึงชื่อหน้ามาให้เอง แก้ชื่อ ไอคอน คำอธิบาย และสีได้ตามต้องการ</p>
+    <p class="msg" id="topMsg"></p>
+    <div class="list" id="list"></div>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">2</span>เชื่อมต่อ GitHub</h2>
+    <p class="sub">กรอกครั้งเดียว ครั้งต่อไปแค่แก้รายการแล้วกดขึ้นเว็บ</p>
+    <div class="grid2">
+      <div><label for="owner">ชื่อผู้ใช้ GitHub</label><input type="text" id="owner" autocomplete="off" spellcheck="false"></div>
+      <div><label for="repo">ชื่อ repo ของหน้ารวม</label><input type="text" id="repo" autocomplete="off" spellcheck="false" placeholder="dashboard"></div>
+    </div>
+    <div style="margin-top:12px">
+      <label for="token">Token</label>
+      <input type="password" id="token" autocomplete="off" spellcheck="false" placeholder="github_pat_...">
+    </div>
+    <label class="check"><input type="checkbox" id="remember"> จำ token บนเครื่องนี้ (ใช้เฉพาะเครื่องส่วนตัว)</label>
+    <p class="liveurl">ลิงก์หน้ารวมจะเป็น <b id="livePreview">—</b></p>
+    <details id="guide">
+      <summary>ยังไม่มี repo หรือ token ทำตาม 3 ขั้นนี้</summary>
+      <ol class="guide">
+        <li>สร้าง repo แบบ <b>Public</b> ชื่อตามช่องด้านบน ที่ <a id="newRepoLink" target="_blank" rel="noopener">github.com/new</a> (ไม่ต้องใส่ไฟล์อะไร)</li>
+        <li>สร้าง token ที่ <a id="tokenLink" target="_blank" rel="noopener">หน้าสร้าง Fine-grained token</a> ช่อง Repository access เลือก Only select repositories แล้วเลือก repo นี้ จากนั้นในส่วน Permissions ให้สิทธิ์ <b>Contents</b> และ <b>Pages</b> เป็น Read and write แล้วกด Generate token</li>
+        <li>คัดลอก token (ขึ้นต้นด้วย github_pat_) มาวางในช่อง Token ด้านบน</li>
+      </ol>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2><span class="n">3</span>ขึ้นเว็บ</h2>
+    <p class="sub">กดปุ่มเดียว ระบบจะอัปโหลดไฟล์ เปิด GitHub Pages ให้ และรอจนเว็บอัปเดตเสร็จ</p>
+    <div class="actions">
+      <button class="btn primary" id="publishBtn" type="button">บันทึกและขึ้นเว็บ</button>
+      <button class="btn" id="previewBtn" type="button">ดูตัวอย่าง</button>
+      <button class="btn" id="dlBtn" type="button">ดาวน์โหลดไฟล์ไปอัปโหลดเอง</button>
+    </div>
+    <label class="check"><input type="checkbox" id="withSettings" checked=""> อัปโหลดหน้าตั้งค่านี้ขึ้นไปด้วย ครั้งหน้าเปิดแก้จากลิงก์ได้เลย</label>
+    <p class="msg bad" id="pubMsg"></p>
+    <ul class="steps" id="steps" hidden=""></ul>
+    <div class="done" id="done" hidden="">
+      <h3>ขึ้นเว็บเรียบร้อย</h3>
+      <div class="link big"><a id="doneLink" target="_blank" rel="noopener"></a><button class="copy" type="button" data-copy="">คัดลอก</button></div>
+      <p class="note" style="margin-bottom:6px">ลิงก์ตรงของแต่ละแดชบอร์ด</p>
+      <div class="links" id="doneLinks"></div>
+      <p class="note">ถ้าเปิดแล้วยังเห็นของเดิม รอประมาณ 1 นาทีแล้วรีเฟรช เพราะ GitHub เก็บแคชหน้าเว็บไว้ช่วงสั้น ๆ</p>
+    </div>
+  </section>
+
+  <p class="note">token ถูกส่งตรงไปที่ api.github.com เท่านั้น และถ้าไม่ได้ติ๊ก "จำ token" จะหายไปเมื่อปิดแท็บนี้ ใครเปิดหน้านี้ได้ก็จริง แต่ถ้าไม่มี token ของคุณจะแก้อะไรบนเว็บไม่ได้</p>
+</div>
+
+<script>
+const SNAPSHOT = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+const HUB_TEMPLATE = `<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>รวมแดชบอร์ด<\/title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊<\/text><\/svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ไฟล์นี้สร้างจากหน้า settings.html แก้รายการแดชบอร์ดที่หน้านั้นแทนการแก้ไฟล์นี้ */
+  :root {
+    --paper: #EEF1F4; --surface: #FFFFFF; --ink: #1C2430; --muted: #5B6675; --line: #D3D9E0; --steel: #2F5D8A;
+    --bar-h: 52px; color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #151A21; --surface: #1D242D; --ink: #E6EAEF; --muted: #9AA5B2; --line: #2E3742; --steel: #6FA3D6; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #151A21; --surface: #1D242D; --ink: #E6EAEF; --muted: #9AA5B2; --line: #2E3742; --steel: #6FA3D6; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: "IBM Plex Sans Thai", "Noto Sans Thai", "Leelawadee UI", Tahoma, sans-serif;
+    display: flex; flex-direction: column;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .bar {
+    flex: 0 0 var(--bar-h); display: flex; align-items: center; gap: 12px;
+    padding: 0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px));
+    background: var(--surface); border-bottom: 1px solid var(--line);
+  }
+  .home { font-weight: 600; font-size: 15px; color: var(--ink); text-decoration: none; padding: 6px 8px; border-radius: 6px; white-space: nowrap; }
+  .home:hover { background: var(--paper); }
+  .tabs { display: flex; gap: 4px; background: var(--paper); padding: 3px; border-radius: 8px; overflow-x: auto; min-width: 0; }
+  .tab { font: inherit; font-size: 14px; border: 0; cursor: pointer; padding: 6px 14px; border-radius: 6px; background: transparent; color: var(--muted); white-space: nowrap; }
+  .tab:hover { color: var(--ink); }
+  .tab[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: inset 0 -2px 0 var(--accent); }
+  .spacer { flex: 1; }
+  .ext { font-size: 13px; color: var(--muted); text-decoration: none; white-space: nowrap; }
+  .ext:hover { color: var(--ink); text-decoration: underline; }
+  .tab:focus-visible, .home:focus-visible, .ext:focus-visible, .pick:focus-visible { outline: 2px solid var(--steel); outline-offset: 2px; }
+  main { flex: 1; position: relative; min-height: 0; }
+  iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--surface); }
+  iframe[hidden] { display: none; }
+  .chooser { height: 100%; overflow: auto; display: grid; place-items: center; padding: 24px 16px; }
+  .chooser[hidden] { display: none; }
+  .chooser h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .chooser p.lead { margin: 0 0 24px; color: var(--muted); }
+  .picks { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; width: min(720px, 100%); }
+  .pick {
+    display: block; text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--accent);
+    border-radius: 4px 10px 10px 4px; padding: 20px 20px 18px;
+  }
+  .pick:hover { border-color: var(--accent); }
+  .pick .ico { font-size: 30px; line-height: 1; display: block; }
+  .pick .name { display: block; font-size: 18px; font-weight: 600; margin: 12px 0 4px; }
+  .pick .desc { display: block; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .hint { margin-top: 20px; font-size: 13px; color: var(--muted); }
+  .hint code { background: var(--surface); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; word-break: break-all; }
+  .empty a { color: var(--steel); }
+  @media (max-width: 560px) {
+    .home .full, .ext .full { display: none; }
+    #ext { display: none; }
+    .tab { padding: 6px 10px; }
+  }
+<\/style>
+<\/head>
+<body>
+  <header class="bar">
+    <a class="home" href="./" id="home" title="กลับหน้าเลือกแดชบอร์ด">📊 <span class="full">รวมแดชบอร์ด<\/span><\/a>
+    <nav class="tabs" role="tablist" id="tabs"><\/nav>
+    <span class="spacer"><\/span>
+    <a class="ext" id="ext" target="_blank" rel="noopener" hidden>เปิดในแท็บใหม่<\/a>
+    <a class="ext" href="settings.html" title="ตั้งค่าแดชบอร์ด">⚙️ <span class="full">ตั้งค่า<\/span><\/a>
+  <\/header>
+
+  <main id="stage">
+    <section class="chooser" id="chooser">
+      <div>
+        <h1>จะดูแดชบอร์ดไหน<\/h1>
+        <p class="lead">เลือกได้ตลอดจากแถบด้านบน ระบบจะจำตัวที่เปิดล่าสุดไว้ให้<\/p>
+        <div class="picks" id="picks"><\/div>
+        <p class="hint" id="hint">ส่งลิงก์ตรงให้ทีมได้ เช่น <code id="eg"><\/code><\/p>
+      <\/div>
+    <\/section>
+  <\/main>
+
+<script>
+  var DASHBOARDS = __DASHBOARDS_JSON__;
+  var STORE_KEY = "hub:lastView";
+
+  var tabs = document.getElementById("tabs");
+  var picks = document.getElementById("picks");
+  var stage = document.getElementById("stage");
+  var chooser = document.getElementById("chooser");
+  var ext = document.getElementById("ext");
+  var frames = {};
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  DASHBOARDS.forEach(function (d) {
+    var icon = d.icon || "📊";
+    var t = el("button", "tab", icon + " " + d.name);
+    t.setAttribute("role", "tab");
+    t.dataset.id = d.id;
+    t.style.setProperty("--accent", d.color);
+    t.onclick = function () { show(d.id, true); };
+    tabs.appendChild(t);
+
+    var p = el("button", "pick");
+    p.style.setProperty("--accent", d.color);
+    p.appendChild(el("span", "ico", icon));
+    p.appendChild(el("span", "name", d.name));
+    if (d.desc) p.appendChild(el("span", "desc", d.desc));
+    p.onclick = function () { show(d.id, true); };
+    picks.appendChild(p);
+  });
+
+  if (DASHBOARDS.length) {
+    document.getElementById("eg").textContent = location.origin + location.pathname + "?view=" + DASHBOARDS[0].id;
+  } else {
+    document.getElementById("hint").hidden = true;
+    var empty = el("p", "empty", "ยังไม่มีแดชบอร์ด ");
+    var a = el("a", null, "เพิ่มที่หน้าตั้งค่า");
+    a.href = "settings.html";
+    empty.appendChild(a);
+    picks.appendChild(empty);
+  }
+
+  function frameFor(d) {
+    if (!frames[d.id]) {
+      var f = document.createElement("iframe");
+      f.src = d.url;
+      f.title = d.name;
+      f.allow = "fullscreen; clipboard-write";
+      f.allowFullscreen = true;
+      stage.appendChild(f);
+      frames[d.id] = f;
+    }
+    return frames[d.id];
+  }
+
+  function show(id, push) {
+    var d = null;
+    for (var i = 0; i < DASHBOARDS.length; i++) if (DASHBOARDS[i].id === id) d = DASHBOARDS[i];
+    chooser.hidden = !!d;
+    Object.keys(frames).forEach(function (k) { frames[k].hidden = true; });
+    var all = tabs.querySelectorAll(".tab");
+    for (var j = 0; j < all.length; j++) all[j].setAttribute("aria-selected", d && all[j].dataset.id === id ? "true" : "false");
+
+    if (d) {
+      frameFor(d).hidden = false;
+      ext.href = d.url;
+      ext.hidden = false;
+      document.title = d.name + " | รวมแดชบอร์ด";
+      try { localStorage.setItem(STORE_KEY, id); } catch (e) {}
+    } else {
+      ext.hidden = true;
+      document.title = "รวมแดชบอร์ด";
+    }
+    if (push) {
+      var u = new URL(location.href);
+      if (d) u.searchParams.set("view", id); else u.searchParams.delete("view");
+      history.pushState({ view: d ? id : null }, "", u);
+    }
+  }
+
+  document.getElementById("home").onclick = function (e) {
+    e.preventDefault();
+    try { localStorage.removeItem(STORE_KEY); } catch (err) {}
+    show(null, true);
+  };
+  window.addEventListener("popstate", function () {
+    show(new URLSearchParams(location.search).get("view"), false);
+  });
+
+  var start = new URLSearchParams(location.search).get("view");
+  if (!start) { try { start = localStorage.getItem(STORE_KEY); } catch (e) {} }
+  show(start, false);
+<\/script>
+<\/body>
+<\/html>
+`;
+
+const SLOT_COUNT = 4;
+const PALETTE = ["#3A78B5", "#C98316", "#2E9A6A", "#B5476B", "#6E5BC4", "#3F8C8C", "#8A6A3A"];
+const DEFAULT_SLOTS = [
+  { id: "scar", icon: "📋", name: "เคลม SCAR", desc: "ติดตามสถานะเคลม เคสค้าง และผู้ขายที่มีเคลมสูงสุด",
+    url: "https://anantsrisu-cpu.github.io/Claim-monitoring/", color: "#3A78B5" },
+  { id: "oil", icon: "⛽", name: "ราคาน้ำมัน", desc: "ราคาขายปลีกรายแบรนด์ กรุงเทพฯ และปริมณฑล",
+    url: "https://anantsrisu-cpu.github.io/eppo-oil-price/", color: "#C98316" },
+  null,
+  null,
+];
+const K = { draft: "hubSettings:draft", gh: "hubSettings:github", token: "hubSettings:token" };
+const store = (s) => ({
+  get(k) { try { return s.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { s.setItem(k, v); } catch (e) {} },
+  del(k) { try { s.removeItem(k); } catch (e) {} },
+});
+let LS, SS;
+try { LS = store(localStorage); SS = store(sessionStorage); } catch (e) { LS = SS = store({ getItem() { return null; }, setItem() {}, removeItem() {} }); }
+
+const $ = (id) => document.getElementById(id);
+let slots = [];
+let slotMsg = [];
+let TOKEN = "";
+
+/* ---------- ตัวช่วย ---------- */
+function slug(s) { return String(s || "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 24); }
+function normalizeUrl(raw) {
+  let s = String(raw || "").trim();
+  if (!s) return null;
+  if (!/^https?:\/\//i.test(s)) s = "https://" + s;
+  try { const u = new URL(s); return /^https?:$/.test(u.protocol) && u.hostname.includes(".") ? u.href : null; } catch (e) { return null; }
+}
+function idFromUrl(url) {
+  try {
+    const u = new URL(url);
+    const parts = u.pathname.split("/").filter(Boolean).filter((p) => !/\.html?$/i.test(p));
+    return slug(parts[parts.length - 1] || u.hostname.split(".")[0]) || "dash";
+  } catch (e) { return "dash"; }
+}
+function guessIcon(text) {
+  const t = String(text || "").toLowerCase();
+  const rules = [
+    [/น้ำมัน|oil|fuel|petrol/, "⛽"], [/เคลม|claim|scar|คุณภาพ|quality|qc/, "📋"],
+    [/ยอดขาย|sales?|revenue|รายได้/, "💰"], [/สต็อก|stock|คลัง|inventory|warehouse/, "📦"],
+    [/ขนส่ง|จัดส่ง|logistic|delivery|shipping/, "🚚"], [/ผลิต|production|โรงงาน|factory/, "🏭"],
+    [/พนักงาน|บุคคล|\bhr\b|staff/, "👥"], [/บัญชี|การเงิน|finance|cost|ต้นทุน|budget/, "💹"],
+  ];
+  for (const [re, ic] of rules) if (re.test(t)) return ic;
+  return "📊";
+}
+function setMsg(id, text, bad) { const m = $(id); m.textContent = text || ""; m.classList.toggle("bad", !!bad); }
+function b64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = "";
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function unb64(b) {
+  const bin = atob(String(b).replace(/\s/g, ""));
+  return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
+}
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const t = (v) => String(v || "").trim();
+
+/* ---------- ช่อง (slot) ---------- */
+function blank(i) { return { id: "", icon: "", name: "", desc: "", url: "", color: PALETTE[i % PALETTE.length] }; }
+function isFilled(s) { return !!(s && t(s.url)); }                       // มีลิงก์ = จะแสดงในหน้ารวม
+function isUsed(s) { return !!(s && (t(s.url) || t(s.name) || t(s.desc))); } // มีข้อมูลอะไรสักอย่าง = แสดงกล่องเต็ม
+function uniqueIdIn(arr, base, skip) {
+  const root = base || "dash";
+  const taken = new Set(arr.filter((s, i) => i !== skip && isFilled(s)).map((s) => s.id));
+  let c = root, n = 2;
+  while (taken.has(c)) c = root + "-" + n++;
+  return c;
+}
+const uniqueId = (base, skip) => uniqueIdIn(slots, base, skip);
+function toSlot(d, i) {
+  if (!d || !isUsed(d)) return blank(i);
+  return { id: d.id || "", icon: d.icon || "📊", name: d.name || "", desc: d.desc || "", url: d.url || "", color: d.color || PALETTE[i % PALETTE.length] };
+}
+function toSlots(j) {
+  let arr = [];
+  if (Array.isArray(j)) arr = j;
+  else if (j && Array.isArray(j.slots)) arr = j.slots;
+  else if (j && Array.isArray(j.dashboards)) arr = j.dashboards; // รูปแบบเวอร์ชันแรก
+  const out = arr.map(toSlot);
+  while (out.length < SLOT_COUNT) out.push(blank(out.length));
+  out.forEach((s, i) => { if (isFilled(s)) s.id = uniqueIdIn(out, slug(s.id) || idFromUrl(s.url), i); });
+  return out;
+}
+function cleanOne(d) {
+  return { id: d.id, icon: t(d.icon) || "📊", name: t(d.name), desc: t(d.desc), url: normalizeUrl(d.url) || d.url, color: d.color || PALETTE[0] };
+}
+function filledList() { return slots.filter(isFilled).map(cleanOne); }
+function slotsForJson() { return slots.map((s) => (isFilled(s) ? cleanOne(s) : null)); }
+function slotsKey(arr) { return JSON.stringify(arr.map((s) => (isFilled(s) ? [s.id, s.icon, s.name, s.desc, s.url, s.color] : null))); }
+function saveDraft() { LS.set(K.draft, JSON.stringify(slots)); }
+
+/* ---------- สร้างไฟล์ ---------- */
+function buildIndex(list) {
+  return HUB_TEMPLATE.split("__DASHBOARDS_JSON__").join(JSON.stringify(list).replace(/</g, "\\u003c"));
+}
+function buildJson() { return JSON.stringify({ version: 2, slots: slotsForJson(), dashboards: filledList() }, null, 2) + "\n"; }
+async function getSettingsSource() {
+  if (location.protocol.startsWith("http")) {
+    try {
+      const r = await fetch(location.href.split("#")[0].split("?")[0], { cache: "no-store" });
+      if (r.ok) { const tx = await r.text(); if (tx.includes("HUB_TEMPLATE")) return tx; }
+    } catch (e) {}
+  }
+  return SNAPSHOT;
+}
+
+/* ---------- แสดงรายการช่อง ---------- */
+function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function render() {
+  const list = $("list");
+  list.innerHTML = "";
+  slots.forEach((d, i) => {
+    const used = isUsed(d), filled = isFilled(d);
+    const box = document.createElement("div");
+    box.className = "item" + (used ? "" : " empty");
+    box.dataset.i = i;
+    if (used) box.style.setProperty("--accent", d.color);
+    const state = filled ? '<span class="state on">แสดงในหน้ารวม</span>'
+      : used ? '<span class="state warn">ยังไม่มีลิงก์</span>' : '<span class="state">ว่าง ไม่แสดง</span>';
+    let html = '<div class="slothead"><span class="slotno">ช่องที่ ' + (i + 1) + "</span>" + state + '<span class="sp"></span>' +
+      '<button class="iconbtn" type="button" data-act="up" title="ย้ายขึ้น" aria-label="ย้ายช่องที่ ' + (i + 1) + ' ขึ้น">▲</button>' +
+      '<button class="iconbtn" type="button" data-act="down" title="ย้ายลง" aria-label="ย้ายช่องที่ ' + (i + 1) + ' ลง">▼</button>' +
+      (used ? '<button class="iconbtn del" type="button" data-act="clear" title="ล้างช่องให้ว่าง" aria-label="ล้างช่องที่ ' + (i + 1) + '">✕</button>' : "") +
+      "</div>";
+    if (used) {
+      html += `
+      <div class="row">
+        <input type="text" class="icon" data-f="icon" aria-label="ไอคอน (อีโมจิ)" maxlength="8">
+        <input type="text" class="grow" data-f="name" aria-label="ชื่อที่แสดงบนปุ่ม" placeholder="ชื่อแดชบอร์ด">
+      </div>
+      <input type="url" data-f="url" aria-label="ลิงก์แดชบอร์ด" placeholder="https://...">
+      <input type="text" data-f="desc" aria-label="คำอธิบายสั้น" placeholder="คำอธิบายสั้น ๆ ใต้ชื่อ (ไม่ใส่ก็ได้)">
+      <div class="meta">
+        <div class="swatches" role="group" aria-label="สีประจำแดชบอร์ด"></div>
+        <span class="vid">ลิงก์ตรง ?view=<input type="text" data-f="id" aria-label="รหัสลิงก์ตรง" spellcheck="false"></span>
+      </div>`;
+    } else {
+      html += '<div class="add"><input type="url" class="slotin" aria-label="ลิงก์แดชบอร์ดสำหรับช่องที่ ' + (i + 1) +
+        '" placeholder="วางลิงก์แดชบอร์ดเพื่อใช้ช่องนี้ หรือปล่อยว่างไว้"><button class="btn" type="button" data-act="fill">ใช้ช่องนี้</button></div>';
+    }
+    const m = slotMsg[i];
+    html += '<p class="msg' + (m && m.bad ? " bad" : "") + '">' + (m ? esc(m.text) : "") + "</p>";
+    box.innerHTML = html;
+    box.querySelectorAll("[data-f]").forEach((inp) => { inp.value = d[inp.dataset.f] || ""; });
+    box.querySelector('[data-act="up"]').disabled = i === 0;
+    box.querySelector('[data-act="down"]').disabled = i === slots.length - 1;
+    const sw = box.querySelector(".swatches");
+    if (sw) PALETTE.forEach((c) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "sw"; b.dataset.color = c;
+      b.style.setProperty("--c", c);
+      b.setAttribute("aria-label", "เลือกสี " + c);
+      b.setAttribute("aria-pressed", String(c.toLowerCase() === String(d.color).toLowerCase()));
+      sw.appendChild(b);
+    });
+    list.appendChild(box);
+  });
+}
+function refreshBox(i) {
+  const box = $("list").children[i];
+  if (!box || box.classList.contains("empty")) { render(); return; }
+  box.querySelectorAll("[data-f]").forEach((inp) => { if (document.activeElement !== inp) inp.value = slots[i][inp.dataset.f] || ""; });
+  const p = box.querySelector(".msg"); const m = slotMsg[i];
+  p.textContent = m ? m.text : ""; p.classList.toggle("bad", !!(m && m.bad));
+}
+
+$("list").addEventListener("input", (e) => {
+  const box = e.target.closest(".item"); const f = e.target.dataset.f;
+  if (!box || !f) return;
+  slots[+box.dataset.i][f] = e.target.value;
+  saveDraft();
+});
+$("list").addEventListener("change", (e) => {
+  const box = e.target.closest(".item"); const f = e.target.dataset.f;
+  if (!box || !f) return;
+  const i = +box.dataset.i, d = slots[i];
+  if (f === "id") { d.id = uniqueId(slug(e.target.value) || idFromUrl(d.url), i); e.target.value = d.id; }
+  if (f === "url") {
+    const u = normalizeUrl(e.target.value);
+    if (u) { d.url = u; e.target.value = u; if (!d.id) d.id = uniqueId(idFromUrl(u), i); slotMsg[i] = null; }
+    else if (!t(e.target.value)) slotMsg[i] = { text: "ช่องนี้ไม่มีลิงก์แล้ว ใส่ลิงก์ใหม่ หรือกด ✕ เพื่อล้างช่องให้ว่าง", bad: true };
+    else slotMsg[i] = { text: "ลิงก์ไม่ถูกต้อง ตรวจว่าคัดลอกมาครบทั้งลิงก์", bad: true };
+    render();
+  }
+  saveDraft();
+});
+$("list").addEventListener("click", (e) => {
+  const box = e.target.closest(".item"); if (!box) return;
+  const i = +box.dataset.i;
+  const sw = e.target.closest(".sw");
+  if (sw) { slots[i].color = sw.dataset.color; render(); saveDraft(); return; }
+  const act = e.target.closest("[data-act]"); if (!act) return;
+  const a = act.dataset.act;
+  if (a === "fill") { fillSlot(i, box.querySelector(".slotin").value); return; }
+  if (a === "clear") {
+    const nm = t(slots[i].name) || t(slots[i].url) || "ช่องนี้";
+    if (!confirm("ล้างช่องที่ " + (i + 1) + ' "' + nm + '" ให้ว่าง?\nแดชบอร์ดนี้จะไม่แสดงในหน้ารวมหลังกดบันทึกและขึ้นเว็บ')) return;
+    slots[i] = blank(i); slotMsg[i] = null;
+  } else {
+    const j = a === "up" ? i - 1 : i + 1;
+    if (j < 0 || j >= slots.length) return;
+    [slots[i], slots[j]] = [slots[j], slots[i]];
+    [slotMsg[i], slotMsg[j]] = [slotMsg[j], slotMsg[i]];
+  }
+  render(); saveDraft();
+});
+$("list").addEventListener("paste", (e) => {
+  if (!e.target.classList.contains("slotin")) return;
+  const i = +e.target.closest(".item").dataset.i;
+  setTimeout(() => fillSlot(i, e.target.value), 0);
+});
+$("list").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" || !e.target.classList.contains("slotin")) return;
+  e.preventDefault();
+  fillSlot(+e.target.closest(".item").dataset.i, e.target.value);
+});
+
+async function fillSlot(i, raw) {
+  if (isUsed(slots[i])) return;
+  const url = normalizeUrl(raw);
+  if (!url) {
+    slotMsg[i] = { text: t(raw) ? "ลิงก์ไม่ถูกต้อง ตรวจว่าคัดลอกมาครบทั้งลิงก์" : "วางลิงก์แดชบอร์ดลงในช่องก่อน", bad: true };
+    render(); return;
+  }
+  const dup = slots.findIndex((x, j) => j !== i && isFilled(x) && normalizeUrl(x.url) === url);
+  if (dup >= 0) { slotMsg[i] = { text: "ลิงก์นี้ใช้อยู่แล้วในช่องที่ " + (dup + 1), bad: true }; render(); return; }
+  const u = new URL(url);
+  let nm = u.pathname.split("/").filter(Boolean).pop() || u.hostname;
+  try { nm = decodeURIComponent(nm); } catch (e) {}
+  const d = { id: "", icon: guessIcon(url), name: nm, desc: "", url, color: PALETTE[i % PALETTE.length] };
+  slots[i] = d;
+  d.id = uniqueId(idFromUrl(url), i);
+  slotMsg[i] = { text: "กำลังดึงชื่อหน้า…" };
+  render(); saveDraft();
+  let text;
+  try {
+    const r = await fetch(url, { cache: "no-store" });
+    const doc = new DOMParser().parseFromString(await r.text(), "text/html");
+    const title = t((doc.querySelector("title") || {}).textContent);
+    const meta = doc.querySelector('meta[name="description"]');
+    if (title) d.name = title.slice(0, 40);
+    if (meta && t(meta.getAttribute("content"))) d.desc = t(meta.getAttribute("content")).slice(0, 90);
+    d.icon = guessIcon(title + " " + url);
+    text = 'ดึงชื่อ "' + d.name + '" มาให้แล้ว แก้ชื่อหรือคำอธิบายได้ตามต้องการ';
+  } catch (e) {
+    text = "เว็บนั้นไม่ให้ดึงชื่อหน้า ตั้งชื่อเองในช่องชื่อได้เลย";
+  }
+  const j = slots.indexOf(d);
+  if (j < 0) return;
+  slotMsg[j] = { text };
+  refreshBox(j); saveDraft();
+}
+
+/* ---------- GitHub ---------- */
+function ghState() { return { owner: $("owner").value.trim(), repo: $("repo").value.trim(), token: $("token").value.trim() }; }
+function liveUrlFor(o, r) {
+  if (!o || !r) return "";
+  const host = o.toLowerCase() + ".github.io";
+  return r.toLowerCase() === host ? "https://" + host + "/" : "https://" + host + "/" + r + "/";
+}
+function updateGhUi() {
+  const { owner, repo } = ghState();
+  $("livePreview").textContent = liveUrlFor(owner, repo) || "—";
+  $("newRepoLink").href = "https://github.com/new?name=" + encodeURIComponent(repo || "dashboard") + "&visibility=public";
+  if (!location.protocol.startsWith("http")) $("backlink").href = liveUrlFor(owner, repo) || "#";
+  LS.set(K.gh, JSON.stringify({ owner, repo }));
+}
+function saveToken() {
+  const tk = $("token").value.trim();
+  if ($("remember").checked) { LS.set(K.token, tk); SS.del(K.token); }
+  else { SS.set(K.token, tk); LS.del(K.token); }
+}
+["owner", "repo"].forEach((id) => $(id).addEventListener("input", updateGhUi));
+$("token").addEventListener("input", saveToken);
+$("remember").addEventListener("change", saveToken);
+$("tokenLink").href = "https://github.com/settings/personal-access-tokens/new?name=" + encodeURIComponent("Dashboard hub") +
+  "&description=" + encodeURIComponent("ใช้กับหน้าตั้งค่าแดชบอร์ด") + "&expires_in=90&contents=write&pages=write";
+
+async function gh(method, path, body) {
+  const headers = { Accept: "application/vnd.github+json", Authorization: "Bearer " + TOKEN, "X-GitHub-Api-Version": "2022-11-28" };
+  if (body) headers["Content-Type"] = "application/json";
+  const r = await fetch("https://api.github.com" + path, { method, headers, body: body ? JSON.stringify(body) : undefined, cache: "no-store" });
+  let data = null;
+  try { data = await r.json(); } catch (e) {}
+  return { status: r.status, ok: r.ok, data };
+}
+function apiErr(res, what) {
+  const m = (res.data && res.data.message) || "";
+  if (res.status === 401) return new Error("token ไม่ถูกต้องหรือหมดอายุแล้ว สร้าง token ใหม่แล้ววางอีกครั้ง");
+  if (res.status === 403 && /rate limit/i.test(m)) return new Error("เรียก GitHub ถี่เกินไป รอสักครู่แล้วกดใหม่");
+  if (res.status === 403) return new Error("token ไม่มีสิทธิ์" + what + " ตรวจว่าให้สิทธิ์ Contents และ Pages เป็น Read and write กับ repo นี้");
+  if (res.status === 404) return new Error("ไม่พบ" + what + " หรือ token ไม่ได้รับสิทธิ์เข้าถึง repo นี้");
+  return new Error("GitHub แจ้งว่า " + (m || "เกิดข้อผิดพลาด") + " (" + res.status + ")");
+}
+async function putFile(ctx, path, content) {
+  let sha;
+  if (!ctx.empty) {
+    const g = await gh("GET", "/repos/" + ctx.o + "/" + ctx.r + "/contents/" + path + "?ref=" + encodeURIComponent(ctx.branch));
+    if (g.status === 200 && g.data) {
+      sha = g.data.sha;
+      if (g.data.content && unb64(g.data.content) === content) return false;
+    } else if (g.status !== 404) throw apiErr(g, "อ่านไฟล์ " + path);
+  }
+  const body = { message: "อัปเดตหน้ารวมแดชบอร์ด: " + path, content: b64(content) };
+  if (sha) body.sha = sha;
+  if (!ctx.empty) body.branch = ctx.branch;
+  const p = await gh("PUT", "/repos/" + ctx.o + "/" + ctx.r + "/contents/" + path, body);
+  if (!p.ok) throw apiErr(p, "อัปโหลดไฟล์ " + path);
+  ctx.empty = false;
+  ctx.lastCommit = p.data && p.data.commit ? p.data.commit.sha : ctx.lastCommit;
+  return true;
+}
+
+const STEP_NAMES = ["ตรวจ token", "ตรวจ repo", "อัปโหลดไฟล์", "เปิด GitHub Pages", "รอ GitHub สร้างเว็บ"];
+function initSteps() {
+  const ul = $("steps"); ul.innerHTML = ""; ul.hidden = false;
+  STEP_NAMES.forEach((n) => {
+    const li = document.createElement("li"); li.className = "wait";
+    li.innerHTML = '<span class="dot" aria-hidden="true"></span><div><span class="t"></span><span class="d"></span></div>';
+    li.querySelector(".t").textContent = n;
+    ul.appendChild(li);
+  });
+}
+function step(i, state, detail) {
+  const li = $("steps").children[i]; if (!li) return;
+  li.className = state;
+  if (detail !== undefined) li.querySelector(".d").textContent = detail;
+}
+
+async function waitBuild(ctx) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < 5 * 60 * 1000) {
+    await sleep(5000);
+    const sec = Math.round((Date.now() - t0) / 1000);
+    const b = await gh("GET", "/repos/" + ctx.o + "/" + ctx.r + "/pages/builds/latest");
+    if (b.ok && b.data) {
+      const mine = !ctx.lastCommit || b.data.commit === ctx.lastCommit;
+      if (mine && b.data.status === "built") return;
+      if (mine && b.data.status === "errored") throw new Error("GitHub สร้างเว็บไม่สำเร็จ: " + ((b.data.error && b.data.error.message) || "ดูรายละเอียดที่แท็บ Actions ของ repo"));
+      step(4, "run", (mine && b.data.status === "building" ? "กำลังสร้างเว็บ" : "รอคิว") + " … " + sec + " วินาที");
+    } else {
+      step(4, "run", "รอคิว … " + sec + " วินาที");
+    }
+  }
+  throw new Error("รอเกิน 5 นาทีแล้ว เว็บอาจยังสร้างไม่เสร็จ ลองเปิดลิงก์อีกสักครู่ หรือดูสถานะที่แท็บ Actions ของ repo");
+}
+
+function validate() {
+  for (let i = 0; i < slots.length; i++) {
+    const s = slots[i];
+    if (!isFilled(s)) {
+      if (isUsed(s)) return "ช่องที่ " + (i + 1) + " ยังไม่มีลิงก์ ใส่ลิงก์ หรือกด ✕ เพื่อล้างช่องให้ว่าง";
+      continue;
+    }
+    if (!t(s.name)) return "ช่องที่ " + (i + 1) + " ยังไม่ได้ตั้งชื่อ";
+    if (!normalizeUrl(s.url)) return "ลิงก์ของช่องที่ " + (i + 1) + " ไม่ถูกต้อง";
+  }
+  if (!slots.some(isFilled)) return "ทุกช่องว่างอยู่ ใส่ลิงก์แดชบอร์ดอย่างน้อย 1 ช่องในขั้นที่ 1";
+  const { owner, repo, token } = ghState();
+  if (!owner || !repo) return "กรอกชื่อผู้ใช้ GitHub และชื่อ repo ในขั้นที่ 2";
+  if (!token) return "วาง token ในขั้นที่ 2 ก่อน (ดูวิธีสร้างได้ในขั้นที่ 2)";
+  return null;
+}
+
+async function publish() {
+  slots.forEach((d, i) => { if (isFilled(d)) d.id = uniqueId(slug(d.id) || idFromUrl(d.url), i); });
+  const err = validate();
+  if (err) { setMsg("pubMsg", err, true); render(); return; }
+  setMsg("pubMsg", "");
+  slots = slots.map((s, i) => (isFilled(s) ? cleanOne(s) : blank(i)));
+  slotMsg = [];
+  render(); saveDraft();
+  const list = filledList();
+  const { owner, repo, token } = ghState();
+  TOKEN = token;
+  $("publishBtn").disabled = true; $("done").hidden = true;
+  initSteps();
+  let cur = 0;
+  try {
+    step(0, "run");
+    const u = await gh("GET", "/user");
+    if (!u.ok) throw apiErr(u, "อ่านข้อมูลบัญชี");
+    step(0, "ok", "เชื่อมต่อในชื่อ " + u.data.login);
+
+    cur = 1; step(1, "run");
+    const r = await gh("GET", "/repos/" + encodeURIComponent(owner) + "/" + encodeURIComponent(repo));
+    if (r.status === 404) {
+      $("guide").open = true;
+      throw new Error("ไม่พบ repo " + owner + "/" + repo + " หรือ token ไม่ได้รับสิทธิ์เข้าถึง repo นี้ สร้าง repo ตามคู่มือในขั้นที่ 2 แล้วกดอีกครั้ง");
+    }
+    if (!r.ok) throw apiErr(r, "อ่านข้อมูล repo");
+    const ctx = { o: r.data.owner.login, r: r.data.name, branch: r.data.default_branch || "main", empty: false, lastCommit: null };
+    const br = await gh("GET", "/repos/" + ctx.o + "/" + ctx.r + "/branches?per_page=1");
+    ctx.empty = br.ok && Array.isArray(br.data) && br.data.length === 0;
+    step(1, "ok", ctx.o + "/" + ctx.r + (ctx.empty ? " (repo ยังว่าง จะใส่ไฟล์แรกให้)" : ""));
+
+    cur = 2; step(2, "run");
+    const files = [["dashboards.json", buildJson()], ["index.html", buildIndex(list)]];
+    if ($("withSettings").checked) files.push(["settings.html", await getSettingsSource()]);
+    let changed = 0;
+    for (const [p, c] of files) {
+      step(2, "run", "กำลังอัปโหลด " + p + " …");
+      if (await putFile(ctx, p, c)) changed++;
+    }
+    const same = files.length - changed;
+    step(2, "ok", (changed ? "อัปเดต " + changed + " ไฟล์" + (same ? " อีก " + same + " ไฟล์เหมือนเดิม" : "") : "ทุกไฟล์ตรงกับบนเว็บอยู่แล้ว") +
+      " (แสดง " + list.length + " จาก " + slots.length + " ช่อง)");
+
+    cur = 3; step(3, "run");
+    let pg = await gh("GET", "/repos/" + ctx.o + "/" + ctx.r + "/pages");
+    let enabled = false;
+    if (pg.status === 404) {
+      const c = await gh("POST", "/repos/" + ctx.o + "/" + ctx.r + "/pages", { build_type: "legacy", source: { branch: ctx.branch, path: "/" } });
+      if (!c.ok) {
+        if (r.data.private && (c.status === 422 || c.status === 403)) throw new Error("repo นี้เป็น Private บัญชี GitHub ฟรีเปิดเว็บได้เฉพาะ repo แบบ Public ไปที่ Settings ของ repo แล้วเปลี่ยนเป็น Public ก่อน");
+        throw apiErr(c, "เปิด GitHub Pages");
+      }
+      pg = c; enabled = true;
+    } else if (!pg.ok) throw apiErr(pg, "อ่านการตั้งค่า GitHub Pages");
+    const live = (pg.data && pg.data.html_url) || liveUrlFor(ctx.o, ctx.r);
+    step(3, "ok", enabled ? "เปิดใช้งานให้แล้ว" : "เปิดใช้งานอยู่แล้ว");
+
+    cur = 4;
+    if (!changed && !enabled) step(4, "skip", "ไม่มีอะไรเปลี่ยน เว็บเป็นเวอร์ชันล่าสุดอยู่แล้ว");
+    else { step(4, "run", "เริ่มสร้างเว็บ…"); await waitBuild(ctx); step(4, "ok", "เว็บอัปเดตแล้ว"); }
+
+    LS.del(K.draft);
+    setMsg("topMsg", "");
+    showDone(live, list);
+  } catch (e) {
+    const msg = e instanceof TypeError ? "เชื่อมต่อ GitHub ไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่" : (e && e.message) || String(e);
+    step(cur, "fail", msg);
+  } finally {
+    $("publishBtn").disabled = false;
+  }
+}
+$("publishBtn").onclick = publish;
+
+function linkRow(url, big) {
+  const row = document.createElement("div"); row.className = "link" + (big ? " big" : "");
+  const a = document.createElement("a"); a.href = url; a.textContent = url; a.target = "_blank"; a.rel = "noopener";
+  const b = document.createElement("button"); b.type = "button"; b.className = "copy"; b.textContent = "คัดลอก"; b.dataset.copy = url;
+  row.append(a, b);
+  return row;
+}
+function showDone(live, list) {
+  const box = $("done"); box.hidden = false;
+  const big = box.querySelector(".link.big"); big.replaceWith(linkRow(live, true));
+  const wrap = $("doneLinks"); wrap.innerHTML = "";
+  list.forEach((d) => {
+    const r = linkRow(live + "?view=" + encodeURIComponent(d.id));
+    r.prepend(Object.assign(document.createElement("span"), { textContent: (d.icon || "📊") + " " }));
+    wrap.appendChild(r);
+  });
+  box.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth", block: "nearest" });
+}
+$("done").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-copy]"); if (!b) return;
+  try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = "คัดลอกแล้ว"; }
+  catch (err) { prompt("คัดลอกลิงก์นี้", b.dataset.copy); }
+  setTimeout(() => { b.textContent = "คัดลอก"; }, 1500);
+});
+
+/* ---------- ตัวอย่าง / ดาวน์โหลด ---------- */
+function download(name, content, type) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([content], { type }));
+  a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+}
+function precheck() {
+  for (let i = 0; i < slots.length; i++) if (!isFilled(slots[i]) && isUsed(slots[i])) return "ช่องที่ " + (i + 1) + " ยังไม่มีลิงก์ ใส่ลิงก์ หรือกด ✕ เพื่อล้างช่องให้ว่าง";
+  if (!slots.some(isFilled)) return "ทุกช่องว่างอยู่ ใส่ลิงก์แดชบอร์ดอย่างน้อย 1 ช่องในขั้นที่ 1";
+  return null;
+}
+$("previewBtn").onclick = () => {
+  const e = precheck(); if (e) { setMsg("pubMsg", e, true); return; }
+  setMsg("pubMsg", "");
+  const url = URL.createObjectURL(new Blob([buildIndex(filledList())], { type: "text/html" }));
+  window.open(url, "_blank");
+};
+$("dlBtn").onclick = async () => {
+  const e = precheck(); if (e) { setMsg("pubMsg", e, true); return; }
+  slots.forEach((d, i) => { if (isFilled(d)) d.id = uniqueId(slug(d.id) || idFromUrl(d.url), i); });
+  const list = filledList();
+  download("index.html", buildIndex(list), "text/html");
+  setTimeout(() => download("dashboards.json", buildJson(), "application/json"), 400);
+  const src = await getSettingsSource();
+  setTimeout(() => download("settings.html", src, "text/html"), 800);
+  setMsg("pubMsg", "ดาวน์โหลด 3 ไฟล์แล้ว อัปโหลดทั้งหมดไปไว้ที่ root ของ repo");
+};
+
+/* ---------- เริ่มต้น ---------- */
+(async function init() {
+  let gs = null;
+  try { gs = JSON.parse(LS.get(K.gh) || "null"); } catch (e) {}
+  let owner = (gs && gs.owner) || "anantsrisu-cpu";
+  let repo = (gs && gs.repo) || "dashboard";
+  const hosted = location.protocol.startsWith("http");
+  if (location.hostname.endsWith(".github.io")) {
+    owner = location.hostname.split(".")[0];
+    const seg = location.pathname.split("/").filter(Boolean);
+    repo = seg.length && !/\.html?$/i.test(seg[0]) ? seg[0] : location.hostname;
+  }
+  $("owner").value = owner; $("repo").value = repo;
+  const remembered = LS.get(K.token);
+  $("remember").checked = !!remembered;
+  $("token").value = remembered || SS.get(K.token) || "";
+  if (!$("token").value) $("guide").open = true;
+  updateGhUi();
+
+  slots = toSlots(DEFAULT_SLOTS);
+  render();
+
+  let draft = null;
+  try { draft = JSON.parse(LS.get(K.draft) || "null"); } catch (e) {}
+  let live = null;
+  const base = hosted ? "" : liveUrlFor(owner, repo);
+  if (hosted || base) {
+    try {
+      const r = await fetch(base + "dashboards.json?t=" + Date.now(), { cache: "no-store" });
+      if (r.ok) live = toSlots(await r.json());
+    } catch (e) {}
+  }
+  if (Array.isArray(draft) && draft.some(isUsed)) {
+    slots = toSlots(draft);
+    if (live && slotsKey(slots) !== slotsKey(live)) {
+      setMsg("topMsg", "แสดงรายการที่แก้ไว้แต่ยังไม่ได้ขึ้นเว็บ ");
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "linkbtn"; b.textContent = "ใช้รายการจากเว็บแทน";
+      b.onclick = () => { slots = live; slotMsg = []; LS.del(K.draft); render(); setMsg("topMsg", ""); };
+      $("topMsg").appendChild(b);
+    }
+  } else if (live && live.some(isFilled)) {
+    slots = live;
+    if (!hosted) setMsg("topMsg", "โหลดรายการปัจจุบันจากเว็บ " + liveUrlFor(owner, repo) + " มาให้แล้ว");
+  }
+  render();
+})();
+</script></body></html>
