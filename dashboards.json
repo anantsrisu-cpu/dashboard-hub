@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "slots": [
+    {
+      "id": "scar",
+      "icon": "📋",
+      "name": "เคลม SCAR",
+      "desc": "ติดตามสถานะเคลม เคสค้าง และผู้ขายที่มีเคลมสูงสุด",
+      "url": "https://anantsrisu-cpu.github.io/Claim-monitoring/",
+      "color": "#3A78B5"
+    },
+    {
+      "id": "oil",
+      "icon": "⛽",
+      "name": "ราคาน้ำมัน",
+      "desc": "ราคาขายปลีกรายแบรนด์ กรุงเทพฯ และปริมณฑล",
+      "url": "https://anantsrisu-cpu.github.io/eppo-oil-price/",
+      "color": "#C98316"
+    },
+    null,
+    null
+  ],
+  "dashboards": [
+    {
+      "id": "scar",
+      "icon": "📋",
+      "name": "เคลม SCAR",
+      "desc": "ติดตามสถานะเคลม เคสค้าง และผู้ขายที่มีเคลมสูงสุด",
+      "url": "https://anantsrisu-cpu.github.io/Claim-monitoring/",
+      "color": "#3A78B5"
+    },
+    {
+      "id": "oil",
+      "icon": "⛽",
+      "name": "ราคาน้ำมัน",
+      "desc": "ราคาขายปลีกรายแบรนด์ กรุงเทพฯ และปริมณฑล",
+      "url": "https://anantsrisu-cpu.github.io/eppo-oil-price/",
+      "color": "#C98316"
+    }
+  ]
+}
