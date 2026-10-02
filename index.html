@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>รวมแดชบอร์ด</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📊</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ไฟล์นี้สร้างจากหน้า settings.html แก้รายการแดชบอร์ดที่หน้านั้นแทนการแก้ไฟล์นี้ */
+  :root {
+    --paper: #EEF1F4; --surface: #FFFFFF; --ink: #1C2430; --muted: #5B6675; --line: #D3D9E0; --steel: #2F5D8A;
+    --bar-h: 52px; color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #151A21; --surface: #1D242D; --ink: #E6EAEF; --muted: #9AA5B2; --line: #2E3742; --steel: #6FA3D6; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #151A21; --surface: #1D242D; --ink: #E6EAEF; --muted: #9AA5B2; --line: #2E3742; --steel: #6FA3D6; color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--paper); color: var(--ink);
+    font-family: "IBM Plex Sans Thai", "Noto Sans Thai", "Leelawadee UI", Tahoma, sans-serif;
+    display: flex; flex-direction: column;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .bar {
+    flex: 0 0 var(--bar-h); display: flex; align-items: center; gap: 12px;
+    padding: 0 max(12px, env(safe-area-inset-right, 0px)) 0 max(12px, env(safe-area-inset-left, 0px));
+    background: var(--surface); border-bottom: 1px solid var(--line);
+  }
+  .home { font-weight: 600; font-size: 15px; color: var(--ink); text-decoration: none; padding: 6px 8px; border-radius: 6px; white-space: nowrap; }
+  .home:hover { background: var(--paper); }
+  .tabs { display: flex; gap: 4px; background: var(--paper); padding: 3px; border-radius: 8px; overflow-x: auto; min-width: 0; }
+  .tab { font: inherit; font-size: 14px; border: 0; cursor: pointer; padding: 6px 14px; border-radius: 6px; background: transparent; color: var(--muted); white-space: nowrap; }
+  .tab:hover { color: var(--ink); }
+  .tab[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: inset 0 -2px 0 var(--accent); }
+  .spacer { flex: 1; }
+  .ext { font-size: 13px; color: var(--muted); text-decoration: none; white-space: nowrap; }
+  .ext:hover { color: var(--ink); text-decoration: underline; }
+  .tab:focus-visible, .home:focus-visible, .ext:focus-visible, .pick:focus-visible { outline: 2px solid var(--steel); outline-offset: 2px; }
+  main { flex: 1; position: relative; min-height: 0; }
+  iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--surface); }
+  iframe[hidden] { display: none; }
+  .chooser { height: 100%; overflow: auto; display: grid; place-items: center; padding: 24px 16px; }
+  .chooser[hidden] { display: none; }
+  .chooser h1 { font-size: 22px; font-weight: 600; margin: 0 0 4px; }
+  .chooser p.lead { margin: 0 0 24px; color: var(--muted); }
+  .picks { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; width: min(720px, 100%); }
+  .pick {
+    display: block; text-align: left; font: inherit; color: inherit; cursor: pointer;
+    background: var(--surface); border: 1px solid var(--line); border-left: 6px solid var(--accent);
+    border-radius: 4px 10px 10px 4px; padding: 20px 20px 18px;
+  }
+  .pick:hover { border-color: var(--accent); }
+  .pick .ico { font-size: 30px; line-height: 1; display: block; }
+  .pick .name { display: block; font-size: 18px; font-weight: 600; margin: 12px 0 4px; }
+  .pick .desc { display: block; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .hint { margin-top: 20px; font-size: 13px; color: var(--muted); }
+  .hint code { background: var(--surface); border: 1px solid var(--line); padding: 1px 6px; border-radius: 4px; word-break: break-all; }
+  .empty a { color: var(--steel); }
+  @media (max-width: 560px) {
+    .home .full, .ext .full { display: none; }
+    #ext { display: none; }
+    .tab { padding: 6px 10px; }
+  }
+</style>
+</head>
+<body>
+  <header class="bar">
+    <a class="home" href="./" id="home" title="กลับหน้าเลือกแดชบอร์ด">📊 <span class="full">รวมแดชบอร์ด</span></a>
+    <nav class="tabs" role="tablist" id="tabs"></nav>
+    <span class="spacer"></span>
+    <a class="ext" id="ext" target="_blank" rel="noopener" hidden>เปิดในแท็บใหม่</a>
+    <a class="ext" href="settings.html" title="ตั้งค่าแดชบอร์ด">⚙️ <span class="full">ตั้งค่า</span></a>
+  </header>
+
+  <main id="stage">
+    <section class="chooser" id="chooser">
+      <div>
+        <h1>จะดูแดชบอร์ดไหน</h1>
+        <p class="lead">เลือกได้ตลอดจากแถบด้านบน ระบบจะจำตัวที่เปิดล่าสุดไว้ให้</p>
+        <div class="picks" id="picks"></div>
+        <p class="hint" id="hint">ส่งลิงก์ตรงให้ทีมได้ เช่น <code id="eg"></code></p>
+      </div>
+    </section>
+  </main>
+
+<script>
+  var DASHBOARDS = [{"id":"scar","icon":"📋","name":"เคลม SCAR","desc":"ติดตามสถานะเคลม เคสค้าง และผู้ขายที่มีเคลมสูงสุด","url":"https://anantsrisu-cpu.github.io/Claim-monitoring/","color":"#3A78B5"},{"id":"oil","icon":"⛽","name":"ราคาน้ำมัน","desc":"ราคาขายปลีกรายแบรนด์ กรุงเทพฯ และปริมณฑล","url":"https://anantsrisu-cpu.github.io/eppo-oil-price/","color":"#C98316"}];
+  var STORE_KEY = "hub:lastView";
+
+  var tabs = document.getElementById("tabs");
+  var picks = document.getElementById("picks");
+  var stage = document.getElementById("stage");
+  var chooser = document.getElementById("chooser");
+  var ext = document.getElementById("ext");
+  var frames = {};
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text != null) e.textContent = text;
+    return e;
+  }
+
+  DASHBOARDS.forEach(function (d) {
+    var icon = d.icon || "📊";
+    var t = el("button", "tab", icon + " " + d.name);
+    t.setAttribute("role", "tab");
+    t.dataset.id = d.id;
+    t.style.setProperty("--accent", d.color);
+    t.onclick = function () { show(d.id, true); };
+    tabs.appendChild(t);
+
+    var p = el("button", "pick");
+    p.style.setProperty("--accent", d.color);
+    p.appendChild(el("span", "ico", icon));
+    p.appendChild(el("span", "name", d.name));
+    if (d.desc) p.appendChild(el("span", "desc", d.desc));
+    p.onclick = function () { show(d.id, true); };
+    picks.appendChild(p);
+  });
+
+  if (DASHBOARDS.length) {
+    document.getElementById("eg").textContent = location.origin + location.pathname + "?view=" + DASHBOARDS[0].id;
+  } else {
+    document.getElementById("hint").hidden = true;
+    var empty = el("p", "empty", "ยังไม่มีแดชบอร์ด ");
+    var a = el("a", null, "เพิ่มที่หน้าตั้งค่า");
+    a.href = "settings.html";
+    empty.appendChild(a);
+    picks.appendChild(empty);
+  }
+
+  function frameFor(d) {
+    if (!frames[d.id]) {
+      var f = document.createElement("iframe");
+      f.src = d.url;
+      f.title = d.name;
+      f.allow = "fullscreen; clipboard-write";
+      f.allowFullscreen = true;
+      stage.appendChild(f);
+      frames[d.id] = f;
+    }
+    return frames[d.id];
+  }
+
+  function show(id, push) {
+    var d = null;
+    for (var i = 0; i < DASHBOARDS.length; i++) if (DASHBOARDS[i].id === id) d = DASHBOARDS[i];
+    chooser.hidden = !!d;
+    Object.keys(frames).forEach(function (k) { frames[k].hidden = true; });
+    var all = tabs.querySelectorAll(".tab");
+    for (var j = 0; j < all.length; j++) all[j].setAttribute("aria-selected", d && all[j].dataset.id === id ? "true" : "false");
+
+    if (d) {
+      frameFor(d).hidden = false;
+      ext.href = d.url;
+      ext.hidden = false;
+      document.title = d.name + " | รวมแดชบอร์ด";
+      try { localStorage.setItem(STORE_KEY, id); } catch (e) {}
+    } else {
+      ext.hidden = true;
+      document.title = "รวมแดชบอร์ด";
+    }
+    if (push) {
+      var u = new URL(location.href);
+      if (d) u.searchParams.set("view", id); else u.searchParams.delete("view");
+      history.pushState({ view: d ? id : null }, "", u);
+    }
+  }
+
+  document.getElementById("home").onclick = function (e) {
+    e.preventDefault();
+    try { localStorage.removeItem(STORE_KEY); } catch (err) {}
+    show(null, true);
+  };
+  window.addEventListener("popstate", function () {
+    show(new URLSearchParams(location.search).get("view"), false);
+  });
+
+  var start = new URLSearchParams(location.search).get("view");
+  if (!start) { try { start = localStorage.getItem(STORE_KEY); } catch (e) {} }
+  show(start, false);
+</script>
+</body>
+</html>
